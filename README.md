@@ -4,9 +4,11 @@
 
 ```
 ~/Projects/ai-the-new-sexy/
-├── index.html          # 663 lines · everything lives here
+├── index.html          # ~830 lines · everything lives here (logo inlined as SVG)
 ├── assets/
-│   └── logo.png        # the hand-lettered neon mark with alpha channel
+│   ├── logo.png        # original hand-lettered neon raster (kept as fallback)
+│   └── logo.svg        # vectorized via vtracer · 30 paths · 163 KB · 14× smaller than PNG
+├── VECTORIZATION.md    # how the logo went raster → vector + DrawSVG entrance
 └── README.md           # this document
 ```
 
