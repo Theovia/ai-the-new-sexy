@@ -1,0 +1,758 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<title>AI · The New Sexy</title>
+<meta name="description" content="A manifesto for an aesthetic engineered by intelligence.">
+
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Fraunces:ital,opsz,wght@0,9..144,300..900;1,9..144,300..900&family=Space+Grotesk:wght@300..700&family=JetBrains+Mono:wght@200..700&display=swap" rel="stylesheet">
+
+<style>
+:root{
+  --bg:#040104;
+  --void:#000;
+  --ink:#f5e6d3;
+  --mute:#7a6878;
+  --magenta:#ff1f71;
+  --hot:#ff4d8f;
+  --rose:#ffb7c5;
+  --blue:#1e5fff;
+  --cyan:#00e5ff;
+  --indigo:#4338ca;
+  --grain-op:.08;
+  --max:1480px;
+}
+*{margin:0;padding:0;box-sizing:border-box}
+html,body{background:var(--void);color:var(--ink);font-family:"Space Grotesk",system-ui,sans-serif;overflow-x:hidden;cursor:none;-webkit-font-smoothing:antialiased;text-rendering:geometricPrecision}
+html{scroll-behavior:auto}
+body{min-height:100vh;font-feature-settings:"ss01","ss02","cv11"}
+::selection{background:var(--magenta);color:var(--void)}
+a{color:inherit;text-decoration:none}
+button{font:inherit;background:none;border:0;color:inherit;cursor:none}
+
+/* ─── ambient layers ─────────────────────────────── */
+#flow{position:fixed;inset:0;width:100vw;height:100vh;z-index:0;pointer-events:none;opacity:.55;mix-blend-mode:screen}
+.grain{position:fixed;inset:0;z-index:60;pointer-events:none;opacity:var(--grain-op);mix-blend-mode:overlay;background-image:url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='200' height='200'><filter id='n'><feTurbulence type='fractalNoise' baseFrequency='.9' numOctaves='3' stitchTiles='stitch'/></filter><rect width='100%' height='100%' filter='url(%23n)' opacity='.7'/></svg>")}
+.scanlines{position:fixed;inset:0;z-index:55;pointer-events:none;opacity:.06;mix-blend-mode:overlay;background:repeating-linear-gradient(0deg,transparent 0,transparent 2px,#fff 2px,#fff 3px)}
+.vignette{position:fixed;inset:0;z-index:50;pointer-events:none;background:radial-gradient(ellipse at center,transparent 30%,rgba(0,0,0,.65) 100%)}
+
+/* ─── cursor ─────────────────────────────────────── */
+.cursor-ring,.cursor-dot{position:fixed;top:0;left:0;pointer-events:none;z-index:90;border-radius:50%;mix-blend-mode:difference;will-change:transform}
+.cursor-ring{width:42px;height:42px;border:1px solid var(--ink);transform:translate(-50%,-50%);transition:width .25s ease,height .25s ease,border-color .25s ease,background .25s ease}
+.cursor-dot{width:5px;height:5px;background:var(--ink);transform:translate(-50%,-50%)}
+.is-hover .cursor-ring{width:80px;height:80px;background:rgba(255,31,113,.18);border-color:var(--magenta);mix-blend-mode:normal}
+
+/* ─── nav ────────────────────────────────────────── */
+.nav{position:fixed;top:0;left:0;width:100%;z-index:80;display:flex;justify-content:space-between;align-items:center;padding:22px 36px;font-family:"JetBrains Mono",monospace;font-size:11px;letter-spacing:.18em;text-transform:uppercase;color:var(--ink);mix-blend-mode:difference}
+.nav .brand{display:flex;align-items:center;gap:10px}
+.nav .brand .pulse{width:7px;height:7px;background:var(--magenta);border-radius:50%;animation:pulse 1.6s ease-in-out infinite}
+@keyframes pulse{0%,100%{opacity:1;transform:scale(1)}50%{opacity:.4;transform:scale(.7)}}
+.nav .links{display:flex;gap:28px;align-items:center}
+.nav .links a{position:relative;padding:6px 0;opacity:.7;transition:opacity .3s}
+.nav .links a:hover{opacity:1}
+.nav .links a::after{content:"";position:absolute;left:0;bottom:0;width:0;height:1px;background:var(--magenta);transition:width .3s ease}
+.nav .links a:hover::after{width:100%}
+
+/* ─── boot ───────────────────────────────────────── */
+.boot{position:fixed;inset:0;z-index:200;background:var(--void);display:flex;align-items:flex-end;padding:36px;font-family:"JetBrains Mono",monospace;font-size:12px;color:var(--rose);letter-spacing:.05em;line-height:1.7;animation:bootSafety 6s forwards}
+@keyframes bootSafety{0%,90%{opacity:1;visibility:visible}100%{opacity:0;visibility:hidden;pointer-events:none}}
+.boot .col{max-width:520px}
+.boot .row{opacity:0;transform:translateY(8px)}
+.boot .row.ok{color:var(--ink)}
+.boot .row.warn{color:var(--cyan)}
+.boot .row.hot{color:var(--magenta)}
+
+/* ─── hero ───────────────────────────────────────── */
+.hero{position:relative;min-height:100svh;width:100%;display:flex;flex-direction:column;align-items:center;justify-content:center;padding:120px 36px 80px;z-index:5}
+.hero-tag{font-family:"JetBrains Mono",monospace;font-size:10px;letter-spacing:.32em;text-transform:uppercase;color:var(--rose);opacity:.7;margin-bottom:42px;display:flex;align-items:center;gap:14px}
+.hero-tag::before,.hero-tag::after{content:"";display:block;width:60px;height:1px;background:var(--rose);opacity:.4}
+
+.logo-stage{position:relative;width:min(92vw,1100px);aspect-ratio:2000/1500;display:flex;align-items:center;justify-content:center;margin-bottom:48px}
+.logo-stage::before{content:"";position:absolute;inset:-8%;background:radial-gradient(ellipse at 30% 50%,rgba(30,95,255,.4) 0%,transparent 50%),radial-gradient(ellipse at 65% 60%,rgba(255,31,113,.45) 0%,transparent 55%);filter:blur(60px);opacity:.9;z-index:-1;animation:breathe 6s ease-in-out infinite alternate}
+@keyframes breathe{0%{opacity:.7;transform:scale(.95)}100%{opacity:1;transform:scale(1.05)}}
+.logo-stage img{width:100%;height:auto;display:block;filter:drop-shadow(0 0 28px rgba(255,31,113,.55)) drop-shadow(0 0 48px rgba(30,95,255,.25));position:relative;z-index:1;will-change:transform,filter}
+.logo-stage svg.distort{position:absolute;inset:0;width:0;height:0;pointer-events:none}
+
+.hero-title{font-family:"Fraunces",serif;font-style:italic;font-weight:300;font-size:clamp(28px,4.5vw,68px);line-height:1.05;text-align:center;letter-spacing:-.02em;max-width:1100px;margin:0 auto}
+.hero-title em{font-style:normal;font-weight:300;background:linear-gradient(110deg,var(--magenta),var(--hot) 40%,var(--cyan) 90%);-webkit-background-clip:text;background-clip:text;color:transparent;display:inline-block}
+.hero-title .word{display:inline-block;overflow:hidden;vertical-align:bottom}
+.hero-title .word > span{display:inline-block;will-change:transform}
+
+.hero-bottom{position:absolute;bottom:36px;left:50%;transform:translateX(-50%);display:flex;flex-direction:column;align-items:center;gap:10px;font-family:"JetBrains Mono",monospace;font-size:10px;letter-spacing:.3em;text-transform:uppercase;color:var(--mute)}
+.hero-bottom .line-v{width:1px;height:42px;background:linear-gradient(to bottom,var(--rose),transparent);animation:drop 2.4s ease-in-out infinite}
+@keyframes drop{0%{transform:scaleY(0);transform-origin:top}50%{transform:scaleY(1);transform-origin:top}51%{transform:scaleY(1);transform-origin:bottom}100%{transform:scaleY(0);transform-origin:bottom}}
+
+/* ─── manifesto pinned ───────────────────────────── */
+.manifesto{position:relative;min-height:100svh;width:100%;padding:0 36px;z-index:5;display:flex;align-items:center;justify-content:center}
+.manifesto-inner{max-width:var(--max);width:100%;display:grid;grid-template-columns:120px 1fr;gap:48px;align-items:start}
+.manifesto-num{font-family:"JetBrains Mono",monospace;font-size:11px;letter-spacing:.3em;text-transform:uppercase;color:var(--rose);opacity:.6;position:sticky;top:50vh}
+.manifesto-num em{font-style:normal;color:var(--magenta);display:block;font-size:80px;line-height:1;font-family:"Fraunces",serif;margin-bottom:8px;font-weight:200}
+.manifesto-lines{display:flex;flex-direction:column;gap:.04em;font-family:"Fraunces",serif;font-weight:200;font-size:clamp(36px,6vw,108px);line-height:1.05;letter-spacing:-.025em}
+.manifesto-lines .line{position:relative;display:block;will-change:transform,opacity;color:var(--mute);transition:color .6s ease}
+.manifesto-lines .line.is-active{color:var(--ink)}
+.manifesto-lines .line em{font-style:italic;background:linear-gradient(110deg,var(--magenta),var(--hot) 40%,var(--cyan));-webkit-background-clip:text;background-clip:text;color:transparent}
+.manifesto-lines .line .scram{font-family:"JetBrains Mono",monospace;font-style:normal;font-weight:400;font-size:.7em;letter-spacing:0;vertical-align:middle;color:var(--cyan);padding:0 .15em}
+.manifesto-lines .line.miss::before,.manifesto-lines .line.miss::after{content:attr(data-text);position:absolute;left:0;top:0;color:transparent;mix-blend-mode:screen;pointer-events:none}
+.manifesto-lines .line.miss::before{color:var(--magenta);transform:translate(-2px,1px);opacity:.45}
+.manifesto-lines .line.miss::after{color:var(--cyan);transform:translate(2px,-1px);opacity:.45}
+
+/* ─── pillars ────────────────────────────────────── */
+.section{position:relative;padding:140px 36px;z-index:5}
+.section-head{max-width:var(--max);margin:0 auto 64px;display:grid;grid-template-columns:120px 1fr 1fr;gap:48px;align-items:end}
+.section-num{font-family:"JetBrains Mono",monospace;font-size:11px;letter-spacing:.3em;text-transform:uppercase;color:var(--rose);opacity:.6}
+.section-num em{font-style:normal;color:var(--magenta);display:block;font-size:80px;line-height:1;font-family:"Fraunces",serif;margin-bottom:8px;font-weight:200}
+.section-title{font-family:"Fraunces",serif;font-weight:200;font-size:clamp(40px,5.6vw,88px);line-height:1.02;letter-spacing:-.025em}
+.section-title em{font-style:italic;color:var(--magenta)}
+.section-desc{font-size:14px;line-height:1.7;color:var(--mute);max-width:46ch;font-family:"JetBrains Mono",monospace}
+
+.pillars-grid{max-width:var(--max);margin:0 auto;display:grid;grid-template-columns:repeat(3,1fr);gap:24px}
+.pillar{position:relative;padding:36px 28px 32px;background:linear-gradient(180deg,rgba(255,255,255,.02),rgba(255,255,255,.005));border:1px solid rgba(255,255,255,.06);border-radius:6px;backdrop-filter:blur(12px);overflow:hidden;will-change:transform;transition:transform .5s cubic-bezier(.2,.8,.2,1),border-color .5s}
+.pillar::before{content:"";position:absolute;top:0;left:0;right:0;height:1px;background:linear-gradient(90deg,transparent,var(--magenta),transparent);transform:scaleX(0);transform-origin:left;transition:transform .6s cubic-bezier(.2,.8,.2,1)}
+.pillar:hover::before{transform:scaleX(1)}
+.pillar:hover{border-color:rgba(255,31,113,.25)}
+.pillar .pill-num{font-family:"JetBrains Mono",monospace;font-size:10px;color:var(--rose);letter-spacing:.3em;margin-bottom:48px;display:flex;justify-content:space-between;align-items:center}
+.pillar .pill-num span:last-child{color:var(--mute)}
+.pillar h3{font-family:"Fraunces",serif;font-weight:200;font-size:36px;line-height:1.05;letter-spacing:-.02em;margin-bottom:14px}
+.pillar h3 em{font-style:italic;color:var(--magenta)}
+.pillar p{font-size:13px;line-height:1.6;color:var(--mute);font-family:"JetBrains Mono",monospace;margin-bottom:24px}
+.pillar .pill-meta{font-family:"JetBrains Mono",monospace;font-size:10px;color:var(--rose);letter-spacing:.2em;text-transform:uppercase;display:flex;justify-content:space-between;border-top:1px solid rgba(255,255,255,.08);padding-top:14px}
+
+.pillar-graphic{height:140px;margin-bottom:24px;position:relative;overflow:hidden;border-radius:3px;background:radial-gradient(ellipse at 50% 60%,rgba(255,31,113,.18),transparent 70%)}
+.pillar-graphic svg{width:100%;height:100%;display:block}
+
+/* ─── marquee ────────────────────────────────────── */
+.marquee{position:relative;width:100%;padding:80px 0;overflow:hidden;z-index:5;border-top:1px solid rgba(255,255,255,.06);border-bottom:1px solid rgba(255,255,255,.06)}
+.marquee-track{display:flex;gap:64px;white-space:nowrap;font-family:"Fraunces",serif;font-style:italic;font-weight:200;font-size:clamp(60px,12vw,180px);letter-spacing:-.03em;line-height:1;will-change:transform}
+.marquee-track span{display:inline-block;background:linear-gradient(180deg,var(--ink),var(--rose));-webkit-background-clip:text;background-clip:text;color:transparent}
+.marquee-track span:nth-child(2n){background:linear-gradient(180deg,var(--magenta),var(--blue));-webkit-background-clip:text;background-clip:text;color:transparent}
+.marquee-track span:nth-child(3n){-webkit-text-stroke:1px var(--ink);background:transparent;color:transparent;-webkit-background-clip:initial;background-clip:initial}
+
+/* ─── gallery / drops ────────────────────────────── */
+.drops{display:grid;grid-template-columns:repeat(12,1fr);gap:18px;max-width:var(--max);margin:0 auto;padding:0 0 80px}
+.drop{position:relative;border:1px solid rgba(255,255,255,.06);border-radius:6px;padding:28px 24px;background:rgba(255,255,255,.015);overflow:hidden;will-change:transform}
+.drop:nth-child(1){grid-column:span 5;aspect-ratio:5/3}
+.drop:nth-child(2){grid-column:span 7;aspect-ratio:7/3}
+.drop:nth-child(3){grid-column:span 4;aspect-ratio:4/3}
+.drop:nth-child(4){grid-column:span 4;aspect-ratio:4/3}
+.drop:nth-child(5){grid-column:span 4;aspect-ratio:4/3}
+.drop .ix{font-family:"JetBrains Mono",monospace;font-size:10px;color:var(--rose);letter-spacing:.3em}
+.drop h4{font-family:"Fraunces",serif;font-weight:200;font-size:30px;line-height:1.05;margin-top:auto;letter-spacing:-.02em}
+.drop h4 em{font-style:italic;color:var(--magenta)}
+.drop{display:flex;flex-direction:column;justify-content:space-between;transition:transform .8s cubic-bezier(.2,.8,.2,1),border-color .6s}
+.drop:hover{transform:translateY(-4px);border-color:rgba(255,31,113,.3)}
+.drop-vis{position:absolute;inset:0;opacity:.55;pointer-events:none;mix-blend-mode:screen}
+.drop-vis text{letter-spacing:.05em}
+.drop > *{position:relative;z-index:1}
+.drop > .drop-vis{z-index:0}
+
+/* ─── cta ────────────────────────────────────────── */
+.cta{position:relative;padding:200px 36px 240px;text-align:center;z-index:5}
+.cta-eye{font-family:"JetBrains Mono",monospace;font-size:10px;color:var(--rose);letter-spacing:.3em;text-transform:uppercase;margin-bottom:28px;opacity:.6}
+.cta h2{font-family:"Fraunces",serif;font-weight:200;font-style:italic;font-size:clamp(60px,9vw,160px);line-height:.95;letter-spacing:-.035em;margin-bottom:36px}
+.cta h2 em{font-style:normal;background:linear-gradient(110deg,var(--magenta),var(--hot) 35%,var(--blue));-webkit-background-clip:text;background-clip:text;color:transparent}
+.cta-btn{display:inline-flex;align-items:center;gap:14px;padding:18px 32px;border:1px solid var(--magenta);font-family:"JetBrains Mono",monospace;font-size:11px;letter-spacing:.25em;text-transform:uppercase;color:var(--ink);position:relative;overflow:hidden;transition:color .4s}
+.cta-btn::before{content:"";position:absolute;inset:0;background:var(--magenta);transform:translateY(101%);transition:transform .5s cubic-bezier(.2,.8,.2,1);z-index:-1}
+.cta-btn:hover::before{transform:translateY(0)}
+.cta-btn:hover{color:var(--void)}
+.cta-btn .arr{font-size:14px}
+
+/* ─── footer ─────────────────────────────────────── */
+footer{position:relative;padding:48px 36px 36px;z-index:5;border-top:1px solid rgba(255,255,255,.06);font-family:"JetBrains Mono",monospace;font-size:10px;letter-spacing:.2em;text-transform:uppercase;color:var(--mute);display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:18px}
+footer a:hover{color:var(--magenta)}
+
+/* ─── reveal helpers ─────────────────────────────── */
+.split-line{overflow:hidden;display:block}
+.split-line > span{display:inline-block;will-change:transform}
+
+@media(max-width:900px){
+  .nav{padding:18px 22px}
+  .nav .links{gap:16px}
+  .hero{padding:100px 22px 60px}
+  .manifesto-inner{grid-template-columns:1fr;gap:24px}
+  .manifesto-num{position:static;top:auto}
+  .section{padding:100px 22px}
+  .section-head{grid-template-columns:1fr;gap:24px}
+  .pillars-grid{grid-template-columns:1fr}
+  .drops{grid-template-columns:1fr}
+  .drops .drop{grid-column:span 1!important;aspect-ratio:auto;min-height:240px}
+  .cta{padding:140px 22px 160px}
+  footer{padding:36px 22px}
+  body{cursor:auto}
+  .cursor-ring,.cursor-dot{display:none}
+  html,body{cursor:auto}
+}
+</style>
+</head>
+<body>
+
+<!-- ambient -->
+<canvas id="flow"></canvas>
+<div class="vignette"></div>
+<div class="scanlines"></div>
+<div class="grain"></div>
+
+<!-- cursor -->
+<div class="cursor-ring" id="cring"></div>
+<div class="cursor-dot" id="cdot"></div>
+
+<!-- boot overlay -->
+<div class="boot" id="boot">
+  <div class="col">
+    <div class="row" data-d="0">&gt; system.init( aesthetic.engine )</div>
+    <div class="row ok" data-d="1">  ✓ neural.fontmap loaded · 4096 glyphs</div>
+    <div class="row ok" data-d="2">  ✓ chromatic.kernel · magenta/cyan ok</div>
+    <div class="row warn" data-d="3">  ↳ binding cursor → liquid.field</div>
+    <div class="row hot" data-d="4">  ✦ rendering manifesto…</div>
+    <div class="row" data-d="5">&gt; READY.</div>
+  </div>
+</div>
+
+<!-- nav -->
+<nav class="nav">
+  <div class="brand"><span class="pulse"></span><span>AI · THE NEW SEXY</span></div>
+  <div class="links">
+    <a href="#manifesto" data-mag>Manifesto</a>
+    <a href="#pillars" data-mag>Pillars</a>
+    <a href="#drops" data-mag>Drops</a>
+    <a href="#contact" data-mag>Enter</a>
+  </div>
+</nav>
+
+<!-- hero -->
+<section class="hero" id="hero">
+  <div class="hero-tag">CHAPTER 00 — A NEW AESTHETIC</div>
+
+  <div class="logo-stage" id="stage">
+    <svg class="distort" aria-hidden="true">
+      <filter id="liquid" x="-20%" y="-20%" width="140%" height="140%">
+        <feTurbulence id="turb" type="fractalNoise" baseFrequency="0.012 0.018" numOctaves="2" seed="3"/>
+        <feDisplacementMap id="disp" in="SourceGraphic" scale="6"/>
+      </filter>
+    </svg>
+    <img id="logo" src="assets/logo.png" alt="Ai · The New Sexy" style="filter:url(#liquid) drop-shadow(0 0 28px rgba(255,31,113,.55)) drop-shadow(0 0 48px rgba(30,95,255,.25))">
+  </div>
+
+  <h1 class="hero-title" id="heroTitle">
+    <span class="word"><span>An</span></span>
+    <span class="word"><span>aesthetic</span></span>
+    <span class="word"><span>engineered</span></span>
+    <span class="word"><span>by</span></span>
+    <em><span class="word"><span>intelligence.</span></span></em>
+  </h1>
+
+  <div class="hero-bottom">
+    <span>scroll</span>
+    <span class="line-v"></span>
+    <span>00 · 06</span>
+  </div>
+</section>
+
+<!-- manifesto pinned -->
+<section class="manifesto" id="manifesto">
+  <div class="manifesto-inner">
+    <div class="manifesto-num"><em>01</em>MANIFESTO<br>· 6 STANZAS</div>
+    <div class="manifesto-lines" id="mLines">
+      <span class="line miss" data-text="Code">Code</span>
+      <span class="line miss" data-text="used to be">used to be</span>
+      <span class="line"><span class="scram" data-final="utilitarian">utilitarian</span>.</span>
+      <span class="line">Now it's <em>seductive</em>.</span>
+      <span class="line">Lines of logic that</span>
+      <span class="line"><em>flirt</em> with <span class="scram" data-final="meaning">meaning</span>.</span>
+      <span class="line">AI is not a tool.</span>
+      <span class="line">It is the <em>new sexy</em>.</span>
+    </div>
+  </div>
+</section>
+
+<!-- pillars -->
+<section class="section" id="pillars">
+  <div class="section-head">
+    <div class="section-num"><em>02</em>PILLARS<br>· TRINITY</div>
+    <h2 class="section-title">Three<br>movements,<br><em>one</em> aesthetic.</h2>
+    <p class="section-desc">Form, intent, friction. Each pillar is a frequency we tune. Together: a posture. The new sexy is not how it looks. It's how it thinks.</p>
+  </div>
+
+  <div class="pillars-grid">
+
+    <article class="pillar" data-tilt>
+      <div class="pill-num"><span>01</span><span>FORM</span></div>
+      <div class="pillar-graphic">
+        <svg viewBox="0 0 200 140" preserveAspectRatio="none">
+          <defs><linearGradient id="g1" x1="0" x2="1"><stop offset="0" stop-color="#ff1f71"/><stop offset="1" stop-color="#1e5fff"/></linearGradient></defs>
+          <path d="M0,90 C40,30 80,140 120,60 S180,80 200,40" fill="none" stroke="url(#g1)" stroke-width="1.5" class="p-line"/>
+          <path d="M0,100 C40,40 80,150 120,70 S180,90 200,50" fill="none" stroke="rgba(255,31,113,.4)" stroke-width="1" class="p-line"/>
+          <path d="M0,110 C40,50 80,160 120,80 S180,100 200,60" fill="none" stroke="rgba(30,95,255,.4)" stroke-width="1" class="p-line"/>
+        </svg>
+      </div>
+      <h3>The shape of <em>thought</em>.</h3>
+      <p>Curves drawn by gradient descent. Contours that hold conviction. Form is not decoration — form is decision compressed into geometry.</p>
+      <div class="pill-meta"><span>·01</span><span>FORM</span></div>
+    </article>
+
+    <article class="pillar" data-tilt>
+      <div class="pill-num"><span>02</span><span>INTENT</span></div>
+      <div class="pillar-graphic">
+        <svg viewBox="0 0 200 140" preserveAspectRatio="none">
+          <g class="p-orbit">
+            <circle cx="100" cy="70" r="40" fill="none" stroke="#ff4d8f" stroke-width="1" stroke-dasharray="2 4"/>
+            <circle cx="100" cy="70" r="25" fill="none" stroke="#00e5ff" stroke-width="1"/>
+            <circle cx="140" cy="70" r="3" fill="#ff1f71"/>
+            <circle cx="100" cy="45" r="2" fill="#00e5ff"/>
+          </g>
+        </svg>
+      </div>
+      <h3>The <em>gravity</em> of attention.</h3>
+      <p>Every pixel a vote. Every motion a reason. Intent is the difference between noise and signal. Between performing and being.</p>
+      <div class="pill-meta"><span>·02</span><span>INTENT</span></div>
+    </article>
+
+    <article class="pillar" data-tilt>
+      <div class="pill-num"><span>03</span><span>FRICTION</span></div>
+      <div class="pillar-graphic">
+        <svg viewBox="0 0 200 140" preserveAspectRatio="none">
+          <g class="p-grid">
+            <line x1="0" y1="35" x2="200" y2="35" stroke="rgba(255,255,255,.15)"/>
+            <line x1="0" y1="70" x2="200" y2="70" stroke="rgba(255,255,255,.25)"/>
+            <line x1="0" y1="105" x2="200" y2="105" stroke="rgba(255,255,255,.15)"/>
+            <line x1="50" y1="0" x2="50" y2="140" stroke="rgba(255,255,255,.15)"/>
+            <line x1="100" y1="0" x2="100" y2="140" stroke="rgba(255,255,255,.25)"/>
+            <line x1="150" y1="0" x2="150" y2="140" stroke="rgba(255,255,255,.15)"/>
+          </g>
+          <path d="M10,120 L40,80 L70,95 L100,40 L130,60 L160,30 L190,50" fill="none" stroke="#ff1f71" stroke-width="1.5" class="p-spark"/>
+        </svg>
+      </div>
+      <h3>The <em>beauty</em> of resistance.</h3>
+      <p>Frictionless is forgettable. Frictionless is sterile. The new sexy resists you a little — enough to make you notice that you noticed.</p>
+      <div class="pill-meta"><span>·03</span><span>FRICTION</span></div>
+    </article>
+
+  </div>
+</section>
+
+<!-- marquee -->
+<div class="marquee" id="marquee">
+  <div class="marquee-track" id="mTrack">
+    <span>The New Sexy</span><span>The New Sexy</span><span>The New Sexy</span>
+    <span>The New Sexy</span><span>The New Sexy</span><span>The New Sexy</span>
+    <span>The New Sexy</span><span>The New Sexy</span>
+  </div>
+</div>
+
+<!-- drops -->
+<section class="section" id="drops">
+  <div class="section-head">
+    <div class="section-num"><em>03</em>DROPS<br>· 5 ARTIFACTS</div>
+    <h2 class="section-title">Field<br>experiments<br>in <em>desire</em>.</h2>
+    <p class="section-desc">Five pieces shipped. Each one a hypothesis. Each one a probe. Visit, lurk, copy. Aesthetic theft is part of the protocol.</p>
+  </div>
+
+  <div class="drops">
+    <a class="drop" data-mag>
+      <span class="ix">·01 / VISUAL</span>
+      <svg class="drop-vis" viewBox="0 0 400 240" preserveAspectRatio="xMidYMid slice"><circle cx="120" cy="120" r="80" fill="none" stroke="#ff1f71" stroke-width=".5"/><circle cx="280" cy="120" r="60" fill="none" stroke="#1e5fff" stroke-width=".5"/></svg>
+      <h4>Halftone <em>breath</em></h4>
+    </a>
+    <a class="drop" data-mag>
+      <span class="ix">·02 / KINETIC</span>
+      <svg class="drop-vis" viewBox="0 0 400 240" preserveAspectRatio="xMidYMid slice"><g><line x1="0" y1="120" x2="400" y2="120" stroke="rgba(255,255,255,.08)"/><path d="M0,120 Q100,40 200,120 T400,120" stroke="#ff4d8f" fill="none" stroke-width="1"/><path d="M0,120 Q100,200 200,120 T400,120" stroke="#00e5ff" fill="none" stroke-width="1"/></g></svg>
+      <h4>Wave / <em>counterwave</em></h4>
+    </a>
+    <a class="drop" data-mag>
+      <span class="ix">·03 / TEXT</span>
+      <svg class="drop-vis flicker-grid" viewBox="0 0 400 240" preserveAspectRatio="xMidYMid slice">
+        <g font-family="JetBrains Mono, monospace" font-size="14">
+          <text x="20"  y="45"  fill="#ff1f71" class="fk">A</text>
+          <text x="60"  y="80"  fill="#00e5ff" class="fk">i</text>
+          <text x="110" y="55"  fill="#ffb7c5" class="fk">/</text>
+          <text x="160" y="100" fill="#1e5fff" class="fk">$</text>
+          <text x="220" y="60"  fill="#ff4d8f" class="fk">x</text>
+          <text x="280" y="90"  fill="#00e5ff" class="fk">@</text>
+          <text x="340" y="50"  fill="#ff1f71" class="fk">#</text>
+          <text x="40"  y="140" fill="#1e5fff" class="fk">~</text>
+          <text x="100" y="170" fill="#ff4d8f" class="fk">%</text>
+          <text x="170" y="155" fill="#ffb7c5" class="fk">+</text>
+          <text x="240" y="180" fill="#00e5ff" class="fk">_</text>
+          <text x="310" y="160" fill="#ff1f71" class="fk">?</text>
+          <text x="370" y="200" fill="#1e5fff" class="fk">&gt;</text>
+          <text x="50"  y="210" fill="#ff4d8f" class="fk">!</text>
+          <text x="200" y="220" fill="#ffb7c5" class="fk">*</text>
+        </g>
+      </svg>
+      <h4>Letters that <em>flicker</em></h4>
+    </a>
+    <a class="drop" data-mag>
+      <span class="ix">·04 / GEOMETRY</span>
+      <svg class="drop-vis poly-stack" viewBox="0 0 400 240" preserveAspectRatio="xMidYMid slice">
+        <g transform="translate(200 120)">
+          <polygon class="poly poly-a" points="0,-90 86,-28 53,73 -53,73 -86,-28" fill="none" stroke="#ff1f71" stroke-width="1"/>
+          <polygon class="poly poly-b" points="0,-70 67,-22 41,57 -41,57 -67,-22" fill="none" stroke="#1e5fff" stroke-width="1"/>
+          <polygon class="poly poly-c" points="0,-50 48,-15 30,40 -30,40 -48,-15" fill="none" stroke="#00e5ff" stroke-width="1"/>
+          <circle r="4" fill="#ff1f71"/>
+          <circle cx="0" cy="-90" r="2" fill="#ffb7c5" class="poly-vert"/>
+          <circle cx="86" cy="-28" r="2" fill="#ffb7c5" class="poly-vert"/>
+          <circle cx="-86" cy="-28" r="2" fill="#ffb7c5" class="poly-vert"/>
+        </g>
+      </svg>
+      <h4>Polygon <em>desire</em></h4>
+    </a>
+    <a class="drop" data-mag>
+      <span class="ix">·05 / VOID</span>
+      <svg class="drop-vis void-vis" viewBox="0 0 400 240" preserveAspectRatio="xMidYMid slice">
+        <defs>
+          <radialGradient id="voidGrad" cx="50%" cy="50%" r="50%">
+            <stop offset="0%" stop-color="#000" stop-opacity="1"/>
+            <stop offset="55%" stop-color="rgba(255,31,113,.05)"/>
+            <stop offset="100%" stop-color="rgba(255,31,113,.55)"/>
+          </radialGradient>
+        </defs>
+        <circle cx="200" cy="120" r="100" fill="url(#voidGrad)"/>
+        <circle cx="200" cy="120" r="22" fill="#000"/>
+        <circle class="void-ring" cx="200" cy="120" r="60" fill="none" stroke="rgba(255,31,113,.5)" stroke-width=".7"/>
+        <circle class="void-ring" cx="200" cy="120" r="80" fill="none" stroke="rgba(0,229,255,.35)" stroke-width=".5"/>
+        <circle class="void-ring" cx="200" cy="120" r="105" fill="none" stroke="rgba(255,31,113,.2)" stroke-width=".5"/>
+      </svg>
+      <h4>Negative <em>seduction</em></h4>
+    </a>
+  </div>
+</section>
+
+<!-- cta -->
+<section class="cta" id="contact">
+  <div class="cta-eye">·04 — INVOCATION</div>
+  <h2 id="ctaTitle">If aesthetics<br>is the language<br>of <em>intent</em>,</h2>
+  <h2 id="ctaTitle2" style="font-style:normal;font-family:'Fraunces';font-weight:200">then <em style="font-style:italic">speak.</em></h2>
+  <div style="margin-top:48px"><a class="cta-btn" data-mag href="#"><span>enter the new sexy</span><span class="arr">→</span></a></div>
+</section>
+
+<footer>
+  <div>·MMXXVI · A.I. · THE NEW SEXY</div>
+  <div>BUILT WITH GSAP · SINGLE FILE · NO FRAMEWORK</div>
+  <div><a href="#hero" data-mag>↑ TO TOP</a></div>
+</footer>
+
+<!-- GSAP CDN (ScrambleText is club-only on public CDN — using own scramble fn instead) -->
+<script src="https://cdn.jsdelivr.net/npm/gsap@3.12.5/dist/gsap.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/gsap@3.12.5/dist/ScrollTrigger.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/gsap@3.12.5/dist/CustomEase.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/gsap@3.12.5/dist/ScrollToPlugin.min.js"></script>
+
+<script>
+if(typeof gsap === "undefined"){ document.getElementById("boot")?.remove(); throw new Error("gsap failed to load"); }
+gsap.registerPlugin(ScrollTrigger, CustomEase, ScrollToPlugin);
+CustomEase.create("expo","M0,0 C0.16,1 0.3,1 1,1");
+CustomEase.create("silk","M0,0 C0.2,0.8 0.2,1 1,1");
+
+const reduceMotion = matchMedia("(prefers-reduced-motion: reduce)").matches;
+
+/* ─────── flow field canvas ─────── */
+(function flow(){
+  const c = document.getElementById("flow"), x = c.getContext("2d");
+  let w,h,parts=[],t=0,mx=.5,my=.5;
+  const N = 90;
+  function size(){ w = c.width = innerWidth; h = c.height = innerHeight; }
+  size(); addEventListener("resize", size, {passive:true});
+  for(let i=0;i<N;i++) parts.push({
+    x: Math.random()*w, y: Math.random()*h,
+    vx:0, vy:0, life: Math.random()*200, hue: Math.random()<.5?330:215
+  });
+  addEventListener("pointermove", e=>{ mx = e.clientX/innerWidth; my = e.clientY/innerHeight; },{passive:true});
+  function noise(nx,ny){
+    return Math.sin(nx*0.0028 + t*0.0007) + Math.cos(ny*0.0024 - t*0.0006);
+  }
+  (function draw(){
+    t++;
+    x.fillStyle = "rgba(0,0,0,.06)";
+    x.fillRect(0,0,w,h);
+    for(const p of parts){
+      const ang = noise(p.x, p.y) * Math.PI * 2 + (mx-.5)*.6;
+      p.vx += Math.cos(ang)*0.05;
+      p.vy += Math.sin(ang)*0.05;
+      p.vx *= .94; p.vy *= .94;
+      p.x += p.vx; p.y += p.vy;
+      p.life--;
+      if(p.life<=0||p.x<0||p.x>w||p.y<0||p.y>h){
+        p.x = Math.random()*w; p.y = Math.random()*h;
+        p.vx=p.vy=0; p.life = 120 + Math.random()*180;
+      }
+      x.fillStyle = `hsla(${p.hue},90%,60%,.55)`;
+      x.fillRect(p.x, p.y, 1.2, 1.2);
+    }
+    requestAnimationFrame(draw);
+  })();
+})();
+
+/* ─────── cursor ─────── */
+(function cursor(){
+  const r = document.getElementById("cring"), d = document.getElementById("cdot");
+  let rx=innerWidth/2, ry=innerHeight/2, dx=rx, dy=ry, mx=rx, my=ry;
+  addEventListener("pointermove", e=>{ mx=e.clientX; my=e.clientY; },{passive:true});
+  function loop(){
+    rx += (mx-rx)*.18; ry += (my-ry)*.18;
+    dx += (mx-dx)*.55; dy += (my-dy)*.55;
+    r.style.transform = `translate(${rx}px,${ry}px) translate(-50%,-50%)`;
+    d.style.transform = `translate(${dx}px,${dy}px) translate(-50%,-50%)`;
+    requestAnimationFrame(loop);
+  }
+  loop();
+  document.querySelectorAll("a,button,[data-mag],.pillar,.drop").forEach(el=>{
+    el.addEventListener("pointerenter",()=>document.body.classList.add("is-hover"));
+    el.addEventListener("pointerleave",()=>document.body.classList.remove("is-hover"));
+  });
+})();
+
+/* ─────── magnetic links ─────── */
+document.querySelectorAll("[data-mag]").forEach(el=>{
+  const strength = 0.35;
+  el.addEventListener("pointermove", e=>{
+    const r = el.getBoundingClientRect();
+    const x = e.clientX - (r.left + r.width/2);
+    const y = e.clientY - (r.top + r.height/2);
+    gsap.to(el, {x: x*strength, y: y*strength, duration: .6, ease:"power3.out"});
+  });
+  el.addEventListener("pointerleave", ()=> gsap.to(el,{x:0,y:0,duration:.7,ease:"elastic.out(1,.4)"}));
+});
+
+/* ─────── boot sequence ─────── */
+(function boot(){
+  const overlay = document.getElementById("boot");
+  const rows = overlay.querySelectorAll(".row");
+  const tl = gsap.timeline({onComplete:()=>{
+    gsap.to(overlay,{autoAlpha:0,duration:.7,ease:"expo",onComplete:()=>overlay.remove()});
+    heroIn();
+  }});
+  rows.forEach((r,i)=>{
+    tl.to(r,{opacity:1,y:0,duration:.18},i*.18);
+  });
+  tl.to({},{duration:.6});
+})();
+
+/* ─────── hero entrance ─────── */
+function heroIn(){
+  const tl = gsap.timeline({defaults:{ease:"expo"}});
+  tl.from(".nav",{y:-20,autoAlpha:0,duration:.8})
+    .from(".hero-tag",{autoAlpha:0,y:20,duration:.7},"-=.5")
+    .from("#stage",{autoAlpha:0,scale:.92,duration:1.3,ease:"silk"},"-=.4")
+    .from("#heroTitle .word > span",{yPercent:120,stagger:.06,duration:1,ease:"silk"},"-=.7")
+    .from(".hero-bottom",{autoAlpha:0,y:10,duration:.6},"-=.4");
+}
+
+/* ─────── liquid logo distortion (cursor reactive) ─────── */
+(function liquid(){
+  const turb = document.getElementById("turb");
+  const disp = document.getElementById("disp");
+  const stage = document.getElementById("stage");
+  let f1 = .012, f2 = .018, scale = 6;
+  const rect = ()=>stage.getBoundingClientRect();
+  let rx=0,ry=0,tx=0,ty=0;
+  addEventListener("pointermove", e=>{
+    const r = rect();
+    rx = (e.clientX - (r.left+r.width/2)) / r.width;
+    ry = (e.clientY - (r.top+r.height/2)) / r.height;
+  },{passive:true});
+  let seed = 0;
+  function tick(){
+    tx += (rx-tx)*.08; ty += (ry-ty)*.08;
+    seed += .35;
+    const dist = Math.min(1, Math.hypot(tx,ty));
+    const s = 4 + dist*22;
+    const bf1 = (.008 + Math.abs(tx)*.025).toFixed(4);
+    const bf2 = (.012 + Math.abs(ty)*.025).toFixed(4);
+    turb.setAttribute("baseFrequency", `${bf1} ${bf2}`);
+    turb.setAttribute("seed", (seed|0).toString());
+    disp.setAttribute("scale", s.toFixed(1));
+    requestAnimationFrame(tick);
+  }
+  if(!reduceMotion) tick();
+})();
+
+/* ─────── parallax logo on scroll ─────── */
+gsap.to("#stage", {
+  yPercent: -25,
+  scale: .82,
+  filter: "blur(6px)",
+  ease: "none",
+  scrollTrigger: { trigger:"#hero", start:"top top", end:"bottom top", scrub:.6 }
+});
+gsap.to("#heroTitle",{
+  yPercent:-80, autoAlpha:0,
+  scrollTrigger:{ trigger:"#hero", start:"top top", end:"bottom top", scrub:.4 }
+});
+
+/* ─────── manifesto pinned reveal ─────── */
+(function mani(){
+  const lines = gsap.utils.toArray("#mLines .line");
+  const tl = gsap.timeline({
+    scrollTrigger:{
+      trigger:"#manifesto", start:"top top", end:`+=${lines.length*240}`,
+      pin:true, scrub:.6,
+      onUpdate(self){
+        const idx = Math.floor(self.progress * (lines.length+1));
+        lines.forEach((l,i)=>l.classList.toggle("is-active", i<idx));
+      }
+    }
+  });
+  lines.forEach((l,i)=>{
+    tl.fromTo(l,
+      { yPercent:120, autoAlpha:0 },
+      { yPercent:0,   autoAlpha:1, duration:1, ease:"silk" },
+      i*.8
+    );
+  });
+  // scramble triggers (custom scramble, no plugin)
+  function scrambleTo(el, finalText, duration=1.4){
+    const chars = "01!?#%&*<>/+-ABCDEFGHJKLMNPQRSTUVWXYZ";
+    const len = finalText.length;
+    const start = performance.now();
+    function tick(now){
+      const t = Math.min(1, (now - start) / (duration*1000));
+      const reveal = Math.floor(t * len * 1.2);
+      let out = "";
+      for(let i=0;i<len;i++){
+        if(i < reveal) out += finalText[i];
+        else out += chars[(Math.random()*chars.length)|0];
+      }
+      el.textContent = out;
+      if(t < 1) requestAnimationFrame(tick);
+      else el.textContent = finalText;
+    }
+    requestAnimationFrame(tick);
+  }
+  gsap.utils.toArray(".scram").forEach(s=>{
+    ScrollTrigger.create({
+      trigger: s.closest(".line"),
+      start: "top 70%",
+      once: true,
+      onEnter(){ scrambleTo(s, s.dataset.final, 1.4); }
+    });
+  });
+})();
+
+/* ─────── section title splits ─────── */
+gsap.utils.toArray(".section-title").forEach(el=>{
+  const html = el.innerHTML;
+  const lines = html.split("<br>");
+  el.innerHTML = lines.map(l=>`<span class="split-line"><span>${l}</span></span>`).join("");
+  const spans = el.querySelectorAll(".split-line > span");
+  gsap.from(spans, {
+    yPercent: 110, duration: 1, ease: "silk", stagger: .08,
+    scrollTrigger: { trigger: el, start: "top 80%" }
+  });
+});
+
+/* ─────── pillar entrances + tilt ─────── */
+gsap.utils.toArray(".pillar").forEach((p,i)=>{
+  gsap.from(p,{
+    y: 60, autoAlpha: 0, duration: 1, ease: "silk", delay: i*.12,
+    scrollTrigger: { trigger: p, start: "top 85%" }
+  });
+  // tilt
+  if(reduceMotion) return;
+  p.addEventListener("pointermove", e=>{
+    const r = p.getBoundingClientRect();
+    const x = (e.clientX - r.left)/r.width - .5;
+    const y = (e.clientY - r.top)/r.height - .5;
+    gsap.to(p, { rotateX: -y*6, rotateY: x*6, transformPerspective: 800, duration: .5, ease: "power2.out" });
+  });
+  p.addEventListener("pointerleave", ()=> gsap.to(p,{rotateX:0,rotateY:0,duration:.8,ease:"elastic.out(1,.5)"}));
+});
+
+/* ─────── pillar svg lines drawing ─────── */
+gsap.utils.toArray(".p-line").forEach((path,i)=>{
+  const len = path.getTotalLength();
+  gsap.set(path,{strokeDasharray:len, strokeDashoffset:len});
+  gsap.to(path,{strokeDashoffset:0, duration:1.6, ease:"silk", delay:i*.15,
+    scrollTrigger:{ trigger:path.closest(".pillar"), start:"top 80%" }
+  });
+});
+gsap.utils.toArray(".p-spark").forEach(path=>{
+  const len = path.getTotalLength();
+  gsap.set(path,{strokeDasharray:len, strokeDashoffset:len});
+  gsap.to(path,{strokeDashoffset:0, duration:1.4, ease:"silk",
+    scrollTrigger:{ trigger:path.closest(".pillar"), start:"top 80%" }
+  });
+});
+gsap.utils.toArray(".p-orbit").forEach(g=>{
+  gsap.to(g,{rotation:360, duration:24, ease:"none", repeat:-1, transformOrigin:"100px 70px"});
+});
+
+/* ─────── marquee ─────── */
+(function marq(){
+  const track = document.getElementById("mTrack");
+  const w = track.scrollWidth/2;
+  gsap.to(track,{x:-w, duration:30, ease:"none", repeat:-1, modifiers:{x: gsap.utils.unitize(v=> parseFloat(v) % -w )}});
+  // direction shift on scroll velocity
+  let last = 0;
+  ScrollTrigger.create({
+    onUpdate(self){
+      const v = self.getVelocity();
+      gsap.to(track,{ timeScale: 1 + Math.min(Math.abs(v)/2000, 4) * Math.sign(v||1), duration:.4 });
+    }
+  });
+})();
+
+/* ─────── drops reveal + parallax ─────── */
+gsap.utils.toArray(".drop").forEach((d,i)=>{
+  gsap.from(d,{ y: 80, autoAlpha: 0, duration: 1, ease: "silk", delay: (i%3)*.08,
+    scrollTrigger:{ trigger: d, start: "top 88%" }
+  });
+});
+
+/* ─────── drop vis · flicker chars ─────── */
+gsap.utils.toArray(".flicker-grid .fk").forEach(t=>{
+  gsap.set(t,{transformOrigin:"center", opacity:.15});
+  gsap.to(t,{
+    opacity: gsap.utils.random(.4, 1),
+    duration: gsap.utils.random(.08, .3),
+    repeat: -1,
+    yoyo: true,
+    repeatRefresh: true,
+    ease: "steps(1)",
+    delay: gsap.utils.random(0, 1.5)
+  });
+});
+
+/* ─────── drop vis · polygon stack ─────── */
+gsap.to(".poly-stack .poly-a", {rotation: 360, duration: 38, ease:"none", repeat:-1, transformOrigin:"center"});
+gsap.to(".poly-stack .poly-b", {rotation:-360, duration: 28, ease:"none", repeat:-1, transformOrigin:"center"});
+gsap.to(".poly-stack .poly-c", {rotation: 360, duration: 18, ease:"none", repeat:-1, transformOrigin:"center"});
+gsap.utils.toArray(".poly-stack .poly").forEach((p,i)=>{
+  gsap.to(p,{ scale: 1.04, duration: 2.6 + i*.4, ease:"sine.inOut", yoyo:true, repeat:-1, transformOrigin:"center" });
+});
+
+/* ─────── drop vis · void rings pulse ─────── */
+gsap.utils.toArray(".void-vis .void-ring").forEach((r,i)=>{
+  gsap.fromTo(r,
+    { scale:.6, opacity:.7, transformOrigin:"200px 120px" },
+    { scale:1.25, opacity:0, duration: 3.2, ease:"power1.out", repeat:-1, delay: i*1.06 }
+  );
+});
+
+/* ─────── cta entrance ─────── */
+gsap.utils.toArray("#ctaTitle, #ctaTitle2").forEach(el=>{
+  el.innerHTML = el.innerHTML.split("<br>").map(l=>`<span class="split-line"><span>${l}</span></span>`).join("");
+  gsap.from(el.querySelectorAll(".split-line > span"),{
+    yPercent: 110, duration: 1.2, ease: "silk", stagger: .1,
+    scrollTrigger:{ trigger:"#contact", start:"top 70%" }
+  });
+});
+
+/* ─────── smooth anchors ─────── */
+document.querySelectorAll("a[href^='#']").forEach(a=>{
+  a.addEventListener("click", e=>{
+    const id = a.getAttribute("href");
+    if(id.length<2) return;
+    const t = document.querySelector(id);
+    if(!t) return;
+    e.preventDefault();
+    gsap.to(window,{duration:1.2, scrollTo:{y:t, offsetY:0}, ease:"silk"});
+  });
+});
+
+/* ─────── ScrollTrigger refresh after fonts ─────── */
+document.fonts && document.fonts.ready.then(()=> ScrollTrigger.refresh());
+</script>
+</body>
+</html>
