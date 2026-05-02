@@ -57,8 +57,8 @@ button{font:inherit;background:none;border:0;color:inherit;cursor:none}
 .nav .links a:hover::after{width:100%}
 
 /* ─── boot ───────────────────────────────────────── */
-.boot{position:fixed;inset:0;z-index:200;background:var(--void);display:flex;align-items:flex-end;padding:36px;font-family:"JetBrains Mono",monospace;font-size:12px;color:var(--rose);letter-spacing:.05em;line-height:1.7;animation:bootSafety 6s forwards}
-@keyframes bootSafety{0%,90%{opacity:1;visibility:visible}100%{opacity:0;visibility:hidden;pointer-events:none}}
+.boot{position:fixed;inset:0;z-index:200;background:var(--void);display:flex;align-items:flex-end;padding:36px;font-family:"JetBrains Mono",monospace;font-size:12px;color:var(--rose);letter-spacing:.05em;line-height:1.7;animation:bootSafety 2.5s forwards}
+@keyframes bootSafety{0%,80%{opacity:1;visibility:visible}100%{opacity:0;visibility:hidden;pointer-events:none}}
 .boot .col{max-width:520px}
 .boot .row{opacity:0;transform:translateY(8px)}
 .boot .row.ok{color:var(--ink)}
@@ -74,7 +74,7 @@ button{font:inherit;background:none;border:0;color:inherit;cursor:none}
 .logo-stage::before{content:"";position:absolute;inset:-8%;background:radial-gradient(ellipse at 30% 50%,rgba(30,95,255,.4) 0%,transparent 50%),radial-gradient(ellipse at 65% 60%,rgba(255,31,113,.45) 0%,transparent 55%);filter:blur(60px);opacity:.9;z-index:-1;animation:breathe 6s ease-in-out infinite alternate}
 @keyframes breathe{0%{opacity:.7;transform:scale(.95)}100%{opacity:1;transform:scale(1.05)}}
 .logo-stage img,
-.logo-stage .logo-svg{width:100%;height:auto;display:block;filter:drop-shadow(0 0 28px rgba(255,31,113,.55)) drop-shadow(0 0 48px rgba(30,95,255,.25));position:relative;z-index:1;will-change:transform,filter}
+.logo-stage .logo-svg{width:100%;height:auto;display:block;filter:drop-shadow(0 0 16px rgba(255,31,113,.55)) drop-shadow(0 0 28px rgba(30,95,255,.25));position:relative;z-index:1;will-change:transform,filter}
 .logo-svg path{vector-effect:non-scaling-stroke}
 .logo-svg.is-drawing path{fill:transparent !important;stroke:rgba(255,255,255,.92);stroke-width:1.4;stroke-linecap:round;stroke-linejoin:round}
 .logo-stage svg.distort{position:absolute;inset:0;width:0;height:0;pointer-events:none}
@@ -237,7 +237,7 @@ footer a:hover{color:var(--magenta)}
     </svg>
     <picture>
       <source srcset="assets/logo.webp" type="image/webp">
-      <img id="logo" src="assets/logo.png" alt="Ai · The New Sexy" style="filter:url(#liquid) drop-shadow(0 0 28px rgba(255,31,113,.55)) drop-shadow(0 0 48px rgba(30,95,255,.25))">
+      <img id="logo" src="assets/logo.png" alt="Ai · The New Sexy" style="filter:url(#liquid) drop-shadow(0 0 16px rgba(255,31,113,.55)) drop-shadow(0 0 28px rgba(30,95,255,.25))">
     </picture>
   </div>
 
@@ -457,7 +457,7 @@ const reduceMotion = matchMedia("(prefers-reduced-motion: reduce)").matches;
 (function flow(){
   const c = document.getElementById("flow"), x = c.getContext("2d");
   let w,h,parts=[],t=0,mx=.5,my=.5;
-  const N = 90;
+  const N = 40;
   function size(){ w = c.width = innerWidth; h = c.height = innerHeight; }
   size(); addEventListener("resize", size, {passive:true});
   for(let i=0;i<N;i++) parts.push({
@@ -524,15 +524,24 @@ document.querySelectorAll("[data-mag]").forEach(el=>{
 /* ─────── boot sequence ─────── */
 (function boot(){
   const overlay = document.getElementById("boot");
+  const seenKey = "ains_seen";
+  const isReturn = (()=>{ try{ return localStorage.getItem(seenKey)==="1"; }catch(e){ return false } })();
+  // returning visitor: skip boot, fade overlay fast, hero in immediately
+  if(isReturn){
+    gsap.to(overlay,{autoAlpha:0,duration:.25,ease:"expo",onComplete:()=>overlay.remove()});
+    setTimeout(heroIn, 60);
+    return;
+  }
+  try{ localStorage.setItem(seenKey,"1"); } catch(e){}
   const rows = overlay.querySelectorAll(".row");
   const tl = gsap.timeline({onComplete:()=>{
-    gsap.to(overlay,{autoAlpha:0,duration:.7,ease:"expo",onComplete:()=>overlay.remove()});
+    gsap.to(overlay,{autoAlpha:0,duration:.4,ease:"expo",onComplete:()=>overlay.remove()});
     heroIn();
   }});
   rows.forEach((r,i)=>{
-    tl.to(r,{opacity:1,y:0,duration:.18},i*.18);
+    tl.to(r,{opacity:1,y:0,duration:.12},i*.06);
   });
-  tl.to({},{duration:.6});
+  tl.to({},{duration:.15});
 })();
 
 /* ─────── hero entrance ─────── */
@@ -589,10 +598,20 @@ function heroIn(){
     rx = (e.clientX - (r.left+r.width/2)) / r.width;
     ry = (e.clientY - (r.top+r.height/2)) / r.height;
   },{passive:true});
-  let seed = 0;
+  let seed = 0, frame = 0, lastTx = 0, lastTy = 0, idleFrames = 0;
   function tick(){
+    frame++;
     tx += (rx-tx)*.08; ty += (ry-ty)*.08;
-    seed += .35;
+    // skip filter update on every other frame (30fps cap on the heavy SVG filter)
+    if(frame % 2 === 0){ requestAnimationFrame(tick); return; }
+    // pause filter writes when cursor is stationary (saves 100% CPU on idle)
+    const dx = Math.abs(tx-lastTx), dy = Math.abs(ty-lastTy);
+    if(dx < .001 && dy < .001){
+      idleFrames++;
+      if(idleFrames > 20){ requestAnimationFrame(tick); return; }
+    } else { idleFrames = 0; }
+    lastTx = tx; lastTy = ty;
+    seed += .7; // compensate for half framerate
     const dist = Math.min(1, Math.hypot(tx,ty));
     const s = 4 + dist*22;
     const bf1 = (.008 + Math.abs(tx)*.025).toFixed(4);
