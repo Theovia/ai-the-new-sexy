@@ -1,6 +1,16 @@
-# Vectorization log
+# Vectorization log (rolled back, see "Outcome")
 
-How the hand-lettered neon logo went from a 2.3 MB raster PNG to an inline SVG that draws itself stroke-by-stroke on entrance.
+How the hand-lettered neon logo went from a 2.3 MB raster PNG to an inline SVG and back. Kept as a research record so the next person doesn't repeat the experiment with the same expectations.
+
+## Outcome (TL;DR)
+
+Vector wins on file weight and animation possibilities (DrawSVG entrance, per-stroke control, infinite resolution) but **cannot replicate the PNG's hand-painted alpha-gradient halo at any setting that still saves bytes**. Even at max fidelity (4115 paths, 2.5 MB) the SVG version reads as "vectorial / clean" rather than "hand-painted / wet ink".
+
+For this brand the hand-painted texture is part of the identity, so the page **rolled back to PNG** and got a `<picture>` element with WebP fallback (4.5× lighter without losing fidelity). Final shipped weight on the wire is **521 KB** for 95 % of browsers — only 3.2× the smallest broken vector attempt, and visually identical to the source.
+
+The SVG file (`assets/logo.svg`, 366 KB, 93 paths) is kept in the repo as a portable export. The page does not load it.
+
+---
 
 ## Why
 

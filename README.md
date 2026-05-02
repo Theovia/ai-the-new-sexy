@@ -4,13 +4,17 @@
 
 ```
 ~/Projects/ai-the-new-sexy/
-├── index.html          # ~830 lines · everything lives here (logo inlined as SVG)
+├── index.html          # ~795 lines · everything lives here
 ├── assets/
-│   ├── logo.png        # original hand-lettered neon raster (kept as fallback)
-│   └── logo.svg        # vectorized via vtracer · 30 paths · 163 KB · 14× smaller than PNG
-├── VECTORIZATION.md    # how the logo went raster → vector + DrawSVG entrance
+│   ├── logo.webp       # 521 KB · what 95% of browsers actually load
+│   ├── logo.png        # 2.34 MB · fallback for old browsers
+│   └── logo.svg        # 366 KB · 93 paths · research artifact, not loaded
+├── _compare/           # screenshots from the optimization journey
+├── VECTORIZATION.md    # the raster → vector → rollback story
 └── README.md           # this document
 ```
+
+The logo ships as a `<picture>` element with a WebP source and PNG fallback. The SVG version is kept in the repo for reference but is not loaded by the page.
 
 ---
 
@@ -569,16 +573,53 @@ function noise(nx,ny){
 
 ## Performance
 
-| Concern         | Mitigation                                                    |
-|-----------------|---------------------------------------------------------------|
-| Cursor tracking | `requestAnimationFrame` lerp, never bind heavy work to mousemove |
-| SVG filter cost | One filter on one image; `feTurbulence` re-evaluated per frame is the heaviest cost — disabled on `prefers-reduced-motion` |
-| Canvas         | 90 particles, single fillRect per particle, fade-trail instead of full clear |
-| Reflow         | All animated transforms; `will-change: transform` on cursor + marquee |
-| ScrollTrigger  | One pinned section, scrub-tied; velocity reader is a single global tick |
-| Mobile         | Custom cursor disabled at `<900px`; tilt/liquid skipped under reduced-motion |
+The page weight, the animation cost, and the perceived load time were all attacked separately.
 
-The page is ~37 KB of HTML + ~2.3 MB of PNG (the logo). Everything else is CDN-cached.
+### Image (logo)
+
+The hero logo is the dominant byte cost. Two formats ship:
+
+```html
+<picture>
+  <source srcset="assets/logo.webp" type="image/webp">  <!-- 521 KB · 95 % of browsers -->
+  <img id="logo" src="assets/logo.png" ...>             <!-- 2.34 MB · old-browser fallback -->
+</picture>
+```
+
+`cwebp -q 92` produces a WebP that is visually indistinguishable from the source PNG (validated headlessly at 1920×1080). Over 4G LTE the logo now arrives in ~1 second instead of ~5.
+
+### Animation cost
+
+| Concern              | Mitigation |
+|----------------------|------------|
+| Cursor tracking      | `requestAnimationFrame` lerp; pointer events never bind heavy work directly |
+| Liquid SVG filter    | Throttled to 30 fps (`frame % 2 === 0`); pauses entirely when cursor is stationary for >20 frames — saves ~100 % CPU on idle |
+| Canvas flow field    | 40 particles (was 90), single `fillRect` per particle, fade-trail instead of full clear |
+| Drop-shadow blur     | 16 + 28 px (was 28 + 48) — about 60 % less pixel work per frame, visually identical neon |
+| Reflow               | All animated transforms; `will-change: transform` on cursor + marquee |
+| ScrollTrigger        | One pinned section, scrub-tied; velocity reader is a single global tick |
+| Mobile               | Custom cursor disabled at `<900 px`; tilt + liquid skipped under `prefers-reduced-motion` |
+
+### Perceived load
+
+| | Before | After |
+|---|--------|-------|
+| First-visit boot sequence | 6 s | 2.5 s |
+| Time to interactive (1st visit) | ~9 s | ~3 s |
+| Time to interactive (return visit) | ~9 s | **~250 ms** |
+
+Returning visitors get a `localStorage` flag (`ains_seen=1`) and skip the boot overlay entirely — the hero entrance starts immediately.
+
+### Total page weight
+
+| Asset | Bytes |
+|-------|-------|
+| HTML  | ~42 KB |
+| WebP logo | 521 KB |
+| GSAP CDN (cached after first visit) | ~150 KB |
+| Google Fonts (often pre-cached) | ~400 KB |
+| **First-visit total** | **~1.1 MB** |
+| **Return-visit total** | **~560 KB** |
 
 ---
 
