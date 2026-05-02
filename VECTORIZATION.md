@@ -22,7 +22,25 @@ cargo install vtracer
 
 (Not on Homebrew; install via cargo.)
 
-## Tuned command
+## The journey: v0 (failed) → v7 (winner)
+
+The first vectorization attempt was *too* aggressive and dropped the bright lettering strokes into the halo's color regions. The lettering became invisible — the page rendered as a magenta blob.
+
+Five subsequent traces were rendered side-by-side at the same viewport to find the actual sweet spot. v7 — moderate filter_speckle, mid color_precision, gradient_step 32 — preserved the lettering while still cutting size 6.4× vs the PNG.
+
+| version | params summary | size | paths | result |
+|---------|----------------|------|-------|--------|
+| v0 (initial) | filter_speckle 16 / color_precision 3 / gradient_step 64 / cutout | 163 KB | 30 | ❌ lettering lost, blob render |
+| v2 (defaults) | speckle 4 / precision 6 / grad 16 | 1.4 MB | 1071 | ✓ legible, but heavier than necessary |
+| v3 mid | speckle 8 / precision 5 / grad 24 | 689 KB | 254 | ✓ legible, soft halo |
+| v4 max fidelity | speckle 2 / precision 8 / grad 8 | 2.5 MB | 4115 | ✓✓ near-PNG, but **heavier** than PNG (anti-vector) |
+| v5 | speckle 6 / precision 6 / grad 20 | 1.0 MB | 492 | ✓ same as v3 with more paths |
+| v6 | speckle 10 / precision 5 / grad 28 | 626 KB | 167 | ✓ |
+| **v7 (winner)** | speckle 12 / precision 4 / grad 32 / stacked | **366 KB** | **93** | ✓✓ legible, 6.4× lighter than PNG |
+
+Side-by-side renders are in `_compare/variants.png` and `_compare/variants2.png`.
+
+## Tuned command (v7 — currently shipped)
 
 ```bash
 cd assets/
@@ -31,39 +49,39 @@ vtracer \
   --output logo.svg \
   --mode spline \
   --colormode color \
-  --filter_speckle 16 \
-  --color_precision 3 \
-  --gradient_step 64 \
+  --filter_speckle 12 \
+  --color_precision 4 \
+  --gradient_step 32 \
   --corner_threshold 60 \
-  --segment_length 8 \
-  --splice_threshold 60 \
+  --segment_length 6 \
+  --splice_threshold 45 \
   --path_precision 1 \
-  --hierarchical cutout
+  --hierarchical stacked
 ```
 
-**Why these flags:**
+**Why these flags (v7):**
 
-| Flag | Default | Tuned | Reason |
-|------|---------|-------|--------|
+| Flag | Default | v7 | Reason |
+|------|---------|----|----|
 | `--mode spline` | spline | spline | curves, not polygons — preserves handwriting feel |
-| `--filter_speckle 16` | 4 | 16 (max) | drops tiny noise paths from the neon halo glow |
-| `--color_precision 3` | 6 | 3 | quantize to fewer color buckets (we don't need 6-bit precision) |
-| `--gradient_step 64` | 16 | 64 | wider color steps → fewer halo layers |
-| `--segment_length 8` | 4 | 8 | longer minimum segments → smoother curves |
-| `--splice_threshold 60` | 45 | 60 | stricter angle to splice splines → cleaner joins |
-| `--path_precision 1` | 8 | 1 | one decimal in path data → smaller file, no visible diff |
-| `--hierarchical cutout` | stacked | cutout | non-stacked clustering — flatter, cleaner topology |
+| `--filter_speckle 12` | 4 | 12 | drops most halo noise but keeps lettering strokes |
+| `--color_precision 4` | 6 | 4 | quantize to 4 bits — enough fidelity for neon palette |
+| `--gradient_step 32` | 16 | 32 | wider color steps → fewer halo layers, but lettering colors survive |
+| `--segment_length 6` | 4 | 6 | smoother curves on the calligraphy |
+| `--splice_threshold 45` | 45 | 45 | default — clean spline joins |
+| `--path_precision 1` | 8 | 1 | one decimal → smaller file, no visible diff |
+| `--hierarchical stacked` | stacked | stacked | preserves the layered structure (halo → mid → strokes) |
 
-Default settings produced 671 paths and a **1.34 MB SVG** (worse than the PNG). The tuned settings drop to **30 paths · 162 KB**, which is the sweet spot.
+The lesson: `gradient_step 64` (max simplification) collapses too many color regions into the dominant one. `gradient_step 32` is the threshold where the lettering's distinct colors survive as their own paths.
 
-## Result
+## Result (v7)
 
 ```
 input  · logo.png · 2,342,613 bytes (2.34 MB)
-output · logo.svg ·   162,881 bytes (163 KB)
-paths  · 30
-fills  · 17 unique colors (multi-layer neon halo + core strokes)
-size   · 14.4× reduction
+output · logo.svg ·   366,190 bytes (366 KB)
+paths  · 93
+size   · 6.4× reduction
+visual · lettering legible, halo stepped (vs PNG smooth alpha)
 ```
 
 ## Inlining + animation
